@@ -5,14 +5,8 @@ workflows:
   android-build:
     name: Android Build (Debug & Release)
     max_build_duration: 30
-    instance_type: mac_mini_m2 # or linux_x2 for fast builds
+    instance_type: mac_mini_m2
     environment:
-      android_signing:
-        # If you configure Android code signing via Codemagic UI (Settings > Code signing identities),
-        # specify your signing reference name here or via environment variables.
-        - keystore_reference
-      groups:
-        - google_play # If publishing to Google Play Store (optional)
       vars:
         PACKAGE_NAME: "com.aistudio.minegocio.posapp"
       java: 17
@@ -71,8 +65,7 @@ workflows:
 
       - name: Build Android Release APK & App Bundle (AAB)
         script: |
-          # If custom release keystore is provided via environment variables, use it;
-          # otherwise, generate a temporary signing keystore for testing release artifacts
+          # Create release key if not configured in environment
           if [ ! -f "my-upload-key.jks" ] && [ -z "$KEYSTORE_PATH" ]; then
             echo "Generating release signing key for CI build..."
             keytool -genkey -v \
