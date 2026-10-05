@@ -1,0 +1,6 @@
+{
+  "name": "MiNegocio POS",
+  "description": "Sistema integral de punto de venta (POS), inventario, compras, caja diaria, gastos y reportes de ganancias para pequeños negocios.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
