@@ -5,11 +5,11 @@ workflows:
   android-build:
     name: Android Build (Debug & Release)
     max_build_duration: 30
-    instance_type: mac_mini_m2
+    instance_type: mac_mini_m2 # Supports macOS and Linux runners
     environment:
       vars:
         PACKAGE_NAME: "com.aistudio.minegocio.posapp"
-      java: 17
+      java: 21 # AGP 9.x+ requires Java 21
 
     cache:
       cache_paths:
@@ -30,12 +30,51 @@ workflows:
       - name: Set up environment and local properties
         script: |
           echo "Setting up build environment..."
+          echo "Java version in build agent:"
+          java -version
+          
+          # Create .env if missing
           if [ ! -f .env ]; then
             if [ -f .env.example ]; then
               cp .env.example .env
             else
               touch .env
             fi
+          fi
+
+          # Create a dummy google-services.json if missing to prevent build warnings
+          if [ ! -f "app/google-services.json" ]; then
+            cat << 'EOF' > app/google-services.json
+          {
+            "project_info": {
+              "project_number": "123456789",
+              "project_id": "minegocio-pos-local",
+              "storage_bucket": "minegocio-pos-local.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789:android:abcdef0123456789",
+                  "android_client_info": {
+                    "package_name": "com.aistudio.minegocio.posapp"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "dummy_api_key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
           fi
           
           # Ensure gradlew has executable permissions
@@ -87,11 +126,3 @@ workflows:
       - app/build/outputs/**/*.apk
       - app/build/outputs/**/*.aab
       - app/build/outputs/**/mapping.txt
-
-    publishing:
-      email:
-        recipients:
-          - user@example.com
-        notify:
-          success: true
-          failure: true
